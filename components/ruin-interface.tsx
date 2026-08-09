@@ -160,7 +160,7 @@ export function RuinInterface() {
           </div>
           <div className="portrait-bay">
             <div className="portrait-frame">
-              <img src="/profile.jpg" alt="Jude Dominic Yap" />
+              <img src="/observed-new/profile.jpg" alt="Jude Dominic Yap" />
               <div className="portrait-scan" aria-hidden="true" />
               <span className="corner c1" /><span className="corner c2" /><span className="corner c3" /><span className="corner c4" />
             </div>
