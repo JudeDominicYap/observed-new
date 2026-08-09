@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export', // Add this line
+  output: 'export',
+  basePath: '/observed-new',     // Add this line
+  assetPrefix: '/observed-new/', // Add this line
   typescript: { ignoreBuildErrors: true },
   images: { unoptimized: true },
   async headers() {
