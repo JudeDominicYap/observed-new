@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { 
   ArrowUp, Plane, Mail, MoveDown, ExternalLink, Rocket, Wind, Gauge, Orbit, 
   Code2, ChevronRight, Target, GraduationCap, Award, FileText, Zap, Eye, 
-  Activity, Settings, Maximize2, Minimize2, ShieldCheck, Cpu
+  Activity, Settings, ShieldCheck, Cpu
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -72,6 +72,7 @@ interface SectionProps {
   icon?: LucideIcon
 }
 
+// Section Component - Forced Visible
 function Section({ id, index, title, active, onEngage, children, icon: Icon }: SectionProps) {
   return (
     <section 
@@ -104,6 +105,7 @@ interface SystemsCardProps {
   icon?: LucideIcon
 }
 
+// Systems Card Component - Forced Visible
 function SystemsCard({ code, title, items, status, wide, icon: Icon }: SystemsCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
   const [transform, setTransform] = useState({ rotateX: 0, rotateY: 0 })
@@ -158,6 +160,7 @@ interface AircraftBayProps {
   onClick: () => void
 }
 
+// Project Card Component - Forced Visible
 function AircraftBay({ project, onClick }: AircraftBayProps) {
   const bayRef = useRef<HTMLDivElement>(null)
   const [transform, setTransform] = useState({ rotateX: 0, rotateY: 0 })
@@ -238,26 +241,21 @@ export function AeronauticalInterface() {
 
   const engage = useCallback((id: string) => setActive(id), [])
 
-  // Custom Cursor Logic with Orientation
+  // Custom Cursor Logic
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!cursorRef.current) return
       
-      // Update position
       cursorRef.current.style.left = `${e.clientX}px`
       cursorRef.current.style.top = `${e.clientY}px`
       
-      // Calculate angle based on movement delta would require tracking previous pos
-      // For smooth rotation, we use velocity vector
-      const now = performance.now()
       const dx = e.movementX
       const dy = e.movementY
       
       if (dx !== 0 || dy !== 0) {
-        const angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90 // +90 to align SVG
+        const angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90
         cursorRef.current.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`
         
-        // Add particles based on speed
         const speed = Math.sqrt(dx*dx + dy*dy)
         if (speed > 5 && trailCanvasRef.current) {
           const ctx = trailCanvasRef.current.getContext('2d')
@@ -275,7 +273,7 @@ export function AeronauticalInterface() {
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [hudMode])
 
-  // Particle Trail Animation Loop
+  // Particle Trail Animation
   useEffect(() => {
     const canvas = trailCanvasRef.current
     if (!canvas) return
@@ -371,7 +369,6 @@ export function AeronauticalInterface() {
       const scrollY = window.scrollY
       setShowTop(scrollY > 520)
       
-      // Simulate flight data
       setAltitude(Math.floor(scrollY / 10))
       setSpeed(Math.min(999, Math.floor(scrollY / 5)))
       setPitch(Math.max(-20, Math.min(20, Math.floor((window.scrollY % 100) - 50) / 5)))
@@ -569,7 +566,10 @@ export function AeronauticalInterface() {
               <div className="corner br" />
               
               <div className="image-wrapper">
-                <img src="/profile.jpg" alt="Pilot Profile" className="pilot-img" />
+                <img src="/profile.jpg" alt="Pilot Profile" className="pilot-img" onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiByeD0iNSIgZmlsbD0iIzJBM0M1NCIvPgo8dGV4dCB4PSI1MCIgeT0iNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPk5PIElNQUdFL0ZBSUxEIExPQUQ8L3RleHQ+Cjwvc3ZnPgo=';
+                }} />
                 <div className="scan-line" />
               </div>
 
