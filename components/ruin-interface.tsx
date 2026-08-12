@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { ArrowUp, Plane, Mail, MoveDown, Github, Linkedin, ExternalLink, Rocket, Wind, Gauge, Orbit } from 'lucide-react'
+import { ArrowUp, Plane, Mail, MoveDown, Github, Linkedin, ExternalLink, Rocket, Wind, Gauge, Orbit, Code2 } from 'lucide-react'
 
 const navItems = [
   { id: 'about', label: 'About' },
@@ -39,6 +39,67 @@ const projects = [
   }
 ]
 
+function Section({ id, index, title, active, onEngage, children }: { id: string; index: string; title: string; active: string; onEngage: (id: string) => void; children: React.ReactNode }) {
+  return (
+    <section 
+      id={id} 
+      className={`section ${active === id ? 'engaged' : ''}`}
+      onMouseEnter={() => onEngage(id)}
+    >
+      <div className="section-heading">
+        <span>{index}</span>
+        <p>// {title}</p>
+        <h2>{title}</h2>
+      </div>
+      {children}
+    </section>
+  )
+}
+
+function SystemsCard({ code, title, items, status, wide, icon }: { code: string; title: string; items: string[]; status: string; wide?: boolean; icon: React.ReactNode }) {
+  return (
+    <div className={`system-card ${wide ? 'wide' : ''}`}>
+      <div className="card-top">
+        {icon}
+        <span>{code}</span>
+        <i />
+      </div>
+      <h3>{title}</h3>
+      <ul>
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+      <div className="card-moss" />
+    </div>
+  )
+}
+
+function AircraftBay({ code, title, text, status, tech, onClick }: { code: string; title: string; text: string; status: string; tech: string[]; onClick: () => void }) {
+  return (
+    <div className="aircraft-bay" onClick={onClick}>
+      <div className="project-code">
+        <span>{code}</span>
+        <span>{status}</span>
+      </div>
+      <div className="project-window">
+        <i /><i /><i />
+      </div>
+      <h3>{title}</h3>
+      <p>{text}</p>
+      <div className="project-tech">
+        {tech.map((t) => (
+          <span key={t} className="tech-tag">{t}</span>
+        ))}
+      </div>
+      <div className="hover-indicator">
+        <span>CLICK TO VIEW</span>
+        <ExternalLink size={16} />
+      </div>
+    </div>
+  )
+}
+
 export function AeronauticalInterface() {
   const radarRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -49,20 +110,20 @@ export function AeronauticalInterface() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [altitude, setAltitude] = useState(0)
   const [speed, setSpeed] = useState(0)
-  
+
   const engage = useCallback((id: string) => setActive(id), [])
 
   // Custom cursor trail effect
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    
+
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    
+
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
-    
+
     const particles: Array<{
       x: number
       y: number
@@ -71,11 +132,10 @@ export function AeronauticalInterface() {
       life: number
       size: number
     }> = []
-    
+
     const handleMouseMove = (e: MouseEvent) => {
       setMousePos({ x: e.clientX, y: e.clientY })
-      
-      // Add particles on mouse move
+
       for (let i = 0; i < 3; i++) {
         particles.push({
           x: e.clientX,
@@ -87,35 +147,34 @@ export function AeronauticalInterface() {
         })
       }
     }
-    
+
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      
-      // Update and draw particles
+
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.x += p.vx
         p.y += p.vy
         p.life -= 0.02
         p.size *= 0.98
-        
+
         if (p.life <= 0) {
           particles.splice(i, 1)
           continue
         }
-        
+
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
         ctx.fillStyle = `rgba(0, 255, 200, ${p.life * 0.6})`
         ctx.fill()
       }
-      
+
       requestAnimationFrame(animate)
     }
-    
+
     window.addEventListener('mousemove', handleMouseMove)
     animate()
-    
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
     }
@@ -191,7 +250,7 @@ export function AeronauticalInterface() {
       setAltitude(Math.floor(window.scrollY / 10))
       setSpeed(Math.min(100, Math.floor(window.scrollY / 50)))
     }
-    
+
     const sections = navItems.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[]
     const observer = new IntersectionObserver(
       (entries) => {
@@ -230,7 +289,7 @@ export function AeronauticalInterface() {
   return (
     <div className="aero-shell" data-active={active}>
       <canvas ref={canvasRef} className="cursor-canvas" aria-hidden="true" />
-      
+
       {/* Animated background with flight path */}
       <div className="sky-backdrop" aria-hidden="true">
         <div className="altitude-lines" />
@@ -284,8 +343,8 @@ export function AeronauticalInterface() {
               <small>PILOT // AERONAUTICAL</small>
             </div>
           </a>
-          <button 
-            className="mobile-menu-toggle" 
+          <button
+            className="mobile-menu-toggle"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
             aria-expanded={isMenuOpen}
@@ -296,10 +355,10 @@ export function AeronauticalInterface() {
           </button>
           <div className={`nav-instruments ${isMenuOpen ? 'open' : ''}`}>
             {navItems.map((item, index) => (
-              <a 
-                key={item.id} 
-                href={`#${item.id}`} 
-                className={active === item.id ? 'active' : ''} 
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                className={active === item.id ? 'active' : ''}
                 onClick={() => {
                   engage(item.id)
                   setIsMenuOpen(false)
@@ -346,7 +405,7 @@ export function AeronauticalInterface() {
               <div className="frame-corner tr" />
               <div className="frame-corner bl" />
               <div className="frame-corner br" />
-              <img src="/observed-new/profile.jpg" alt="Jude Dominic Yap" />
+              <img src="/profile.jpg" alt="Jude Dominic Yap" />
               <div className="hud-overlay" aria-hidden="true">
                 <div className="hud-line horizontal" />
                 <div className="hud-line vertical" />
@@ -377,7 +436,6 @@ export function AeronauticalInterface() {
             <p>My passion lies in understanding the principles of flight, aircraft design, and aerospace technology. Currently building my technical foundation through programming and engineering coursework while preparing for university-level aerospace studies.</p>
             <div className="flight-manual" aria-hidden="true">
               <Plane size={48} />
-              <div className="manual-lines" />
               <b>ENGINEERING<br />AHEAD</b>
             </div>
           </div>
@@ -429,15 +487,6 @@ export function AeronauticalInterface() {
         </Section>
 
         <Section id="certificates" index="05" title="CERTIFICATIONS" active={active} onEngage={engage}>
-          <div className="certificate-dock">
-            <div className="dock-empty">
-              <div className="dock-symbol">◇<span>⌁</span></div>
-              <div><p className="micro-label">CERTIFICATION DOCK AVAILABLE</p><h3>New certifications incoming.</h3><p>Aerospace and engineering certifications will be logged here as they are earned.</p></div>
-            </div>
-          </div>
-        </Section>
-        
-        <Section id="certificates" index="05" title="EARNED CERTIFICATIONS" active={active} onEngage={engage}>
           <div className="certificate-display">
             <div className="certificate-plaque">
               <span className="plaque-date">JULY<br />2025</span>
@@ -462,7 +511,10 @@ export function AeronauticalInterface() {
 
         <Section id="contact" index="06" title="COMMUNICATIONS" active={active} onEngage={engage}>
           <div className="comms-array">
-            <div><p className="lead">Communication channels are open.</p><p>Reach out through any available frequency.</p></div>
+            <div>
+              <p className="lead">Communication channels are open.</p>
+              <p>Reach out through any available frequency.</p>
+            </div>
             <div className="comms-links">
               <a href="https://linkedin.com/in/judedominicyap" target="_blank" rel="noreferrer" className="comm-channel">
                 <Linkedin size={18} />
@@ -483,4 +535,54 @@ export function AeronauticalInterface() {
             <div className="comms-actions">
               <a href="mailto:judedominic.yap@gmail.com?subject=Aerospace Collaboration&body=Hi Jude, I'm interested in..." className="thrust-button">
                 <Mail size={18} />
-               
+                <span>INITIATE CONTACT</span>
+              </a>
+            </div>
+          </div>
+        </Section>
+      </main>
+
+      <footer>
+        <p>© 2026 JUDE DOMINIC YAP // ALL SYSTEMS OPERATIONAL</p>
+        <p>DESIGNED WITH AERONAUTICAL PRECISION</p>
+      </footer>
+
+      <button
+        className={`top-button ${showTop ? 'visible' : ''}`}
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label="Back to top"
+      >
+        <ArrowUp size={20} />
+      </button>
+
+      {modalProject && (
+        <div className="modal-overlay" onClick={() => setModalProject(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setModalProject(null)}>&times;</button>
+            <div className="modal-header">
+              <span className="modal-code">{modalProject.code}</span>
+              <span className="modal-state">{modalProject.state}</span>
+            </div>
+            <h3 className="modal-title">{modalProject.title}</h3>
+            <p className="modal-description">{modalProject.description}</p>
+            <div className="modal-tech">
+              {modalProject.tech.map((t) => (
+                <span key={t} className="tech-tag-modal">{t}</span>
+              ))}
+            </div>
+            <div className="modal-actions">
+              {modalProject.link && modalProject.link !== '#' ? (
+                <a href={modalProject.link} target="_blank" rel="noopener noreferrer" className="thrust-button">
+                  <ExternalLink size={16} />
+                  <span>VIEW PROJECT</span>
+                </a>
+              ) : (
+                <span className="status-message">Project details coming soon...</span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
