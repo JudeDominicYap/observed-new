@@ -1,19 +1,18 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { ArrowUp, Plane, Mail, MoveDown, ExternalLink, Rocket, Wind, Gauge, Orbit, Code2, ChevronRight, Target, GraduationCap } from 'lucide-react'
 import { ArrowUp, Plane, Mail, MoveDown, ExternalLink, Rocket, Wind, Gauge, Orbit, Code2, ChevronRight, Target, GraduationCap, Award } from 'lucide-react'
 
 const Github = (props: any) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.02c3.18-.35 6.52-1.54 6.52-7.1a5.3 5.3 0 0 0-1.5-3.75 5.1 5.1 0 0 0-.1-3.8s-1.1-.35-3.5 1.25a12.8 12.8 0 0 0-7 0C6.1 2.3 5 2.65 5 2.65a5.1 5.1 0 0 0-.1 3.8A5.3 5.3 0 0 0 3 10.1c0 5.56 3.34 6.75 6.52 7.1a4.8 4.8 0 0 0-1 3.02v4"/></svg>;
 const Linkedin = (props: any) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>;
 
 const navItems = [
-  { id: 'about', label: 'Profile' },
-  { id: 'skills', label: 'Systems' },
-  { id: 'projects', label: 'Hangar' },
-  { id: 'education', label: 'Flight Log' },
-  { id: 'certificates', label: 'Credentials' },
-  { id: 'contact', label: 'Comms' }
+  { id: 'about', label: 'About' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'education', label: 'Education' },
+  { id: 'certificates', label: 'Certificates' },
+  { id: 'contact', label: 'Contact' }
 ]
 
 const projects = [
@@ -43,37 +42,36 @@ const projects = [
   }
 ]
 
-function Section({ id, index, title, active, onEngage, children, icon: Icon }: { id: string; index: string; title: string; active: string; onEngage: (id: string) => void; children: React.ReactNode; icon: any }) {
-  const [isVisible, setIsVisible] = useState(true)
-  const sectionRef = useRef<HTMLElement>(null)
+function Section({ id, index, title, active, onEngage, children }: { id: string; index: string; title: string; active: string; onEngage: (id: string) => void; children: React.ReactNode }) {
+  const sectionRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!sectionRef.current) return
-      const rect = sectionRef.current.getBoundingClientRect()
-      const isHovering = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom
-      setIsVisible(!isHovering)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          sectionRef.current?.classList.add('visible')
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
     }
 
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
+    return () => observer.disconnect()
   }, [])
 
   return (
     <section 
       ref={sectionRef}
       id={id} 
-      className={`section ${active === id ? 'engaged' : ''} ${isVisible ? 'visible' : ''}`}
+      className={`section ${active === id ? 'engaged' : ''}`}
       onMouseEnter={() => onEngage(id)}
     >
       <div className="section-heading">
-        <div className="section-icon">
-          <Icon size={28} />
-        </div>
-        <div className="section-meta">
-          <span>{index}</span>
-          <p>// {title}</p>
-        </div>
+        <span>{index}</span>
+        <p>// {title}</p>
         <h2>{title}</h2>
       </div>
       {children}
@@ -81,29 +79,34 @@ function Section({ id, index, title, active, onEngage, children, icon: Icon }: {
   )
 }
 
-function SystemsCard({ code, title, items, status, wide, icon: Icon }: { code: string; title: string; items: string[]; status: string; wide?: boolean; icon: any }) {
-  const [isVisible, setIsVisible] = useState(true)
+function SystemsCard({ code, title, items, status, wide, icon }: { code: string; title: string; items: string[]; status: string; wide?: boolean; icon: React.ReactNode }) {
+function SystemsCard({ code, title, items, status, wide, icon, index }: { code: string; title: string; items: string[]; status: string; wide?: boolean; icon: React.ReactNode; index: number }) {
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!cardRef.current) return
-      const rect = cardRef.current.getBoundingClientRect()
-      const isHovering = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom
-      setIsVisible(!isHovering)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            cardRef.current?.classList.add('visible')
+          }, index * 100)
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current)
     }
 
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [])
+    return () => observer.disconnect()
+  }, [index])
 
   return (
-    <div 
-      ref={cardRef}
-      className={`system-card ${wide ? 'wide' : ''} ${isVisible ? 'visible' : ''}`}
-    >
+    <div className={`system-card ${wide ? 'wide' : ''}`}>
+    <div ref={cardRef} className={`system-card ${wide ? 'wide' : ''}`}>
       <div className="card-top">
-        <Icon size={20} />
+        {icon}
         <span>{code}</span>
         <i />
       </div>
@@ -119,27 +122,31 @@ function SystemsCard({ code, title, items, status, wide, icon: Icon }: { code: s
 }
 
 function AircraftBay({ code, title, text, status, tech, onClick }: { code: string; title: string; text: string; status: string; tech: string[]; onClick: () => void }) {
-  const [isVisible, setIsVisible] = useState(true)
+function AircraftBay({ code, title, text, status, tech, onClick, index }: { code: string; title: string; text: string; status: string; tech: string[]; onClick: () => void; index: number }) {
   const bayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!bayRef.current) return
-      const rect = bayRef.current.getBoundingClientRect()
-      const isHovering = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom
-      setIsVisible(!isHovering)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            bayRef.current?.classList.add('visible')
+          }, index * 150)
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (bayRef.current) {
+      observer.observe(bayRef.current)
     }
 
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [])
+    return () => observer.disconnect()
+  }, [index])
 
   return (
-    <div 
-      ref={bayRef}
-      className={`aircraft-bay ${isVisible ? 'visible' : ''}`} 
-      onClick={onClick}
-    >
+    <div className="aircraft-bay" onClick={onClick}>
+    <div ref={bayRef} className="aircraft-bay" onClick={onClick}>
       <div className="project-code">
         <span>{code}</span>
         <span>{status}</span>
@@ -172,67 +179,56 @@ export function AeronauticalInterface() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [altitude, setAltitude] = useState(0)
   const [speed, setSpeed] = useState(0)
-  const cursorDotRef = useRef<HTMLDivElement>(null)
-  const cursorRingRef = useRef<HTMLDivElement>(null)
+  const [isHovering, setIsHovering] = useState(false)
 
   const engage = useCallback((id: string) => setActive(id), [])
 
-  // Custom cursor tracking
+  // Custom cursor trail effect
+  // Custom cursor effect
   useEffect(() => {
+    const cursorDot = document.createElement('div')
+    cursorDot.className = 'cursor-dot'
+    document.body.appendChild(cursorDot)
+
+    const cursorRing = document.createElement('div')
+    cursorRing.className = 'cursor-ring'
+    document.body.appendChild(cursorRing)
+
     const handleMouseMove = (e: MouseEvent) => {
       setMousePos({ x: e.clientX, y: e.clientY })
-
-      if (cursorDotRef.current) {
-        cursorDotRef.current.style.left = `${e.clientX}px`
-        cursorDotRef.current.style.top = `${e.clientY}px`
-      }
-
-      if (cursorRingRef.current) {
-        cursorRingRef.current.style.left = `${e.clientX}px`
-        cursorRingRef.current.style.top = `${e.clientY}px`
-      }
+      
+      cursorDot.style.left = `${e.clientX}px`
+      cursorDot.style.top = `${e.clientY}px`
+      
+      cursorRing.style.left = `${e.clientX}px`
+      cursorRing.style.top = `${e.clientY}px`
     }
 
-    const handleMouseDown = () => {
-      cursorDotRef.current?.classList.add('active')
-      cursorRingRef.current?.classList.add('active')
-    }
-
-    const handleMouseUp = () => {
-      cursorDotRef.current?.classList.remove('active')
-      cursorRingRef.current?.classList.remove('active')
-    }
-
-    const handleMouseEnter = (e: MouseEvent) => {
-      if (e.target instanceof HTMLElement && (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('.aircraft-bay'))) {
-        cursorDotRef.current?.classList.add('active')
-        cursorRingRef.current?.classList.add('active')
-      }
-    }
-
-    const handleMouseLeave = (e: MouseEvent) => {
-      if (e.target instanceof HTMLElement && (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('.aircraft-bay'))) {
-        cursorDotRef.current?.classList.remove('active')
-        cursorRingRef.current?.classList.remove('active')
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === 'A' || target.tagName === 'BUTTON' || target.closest('a') || target.closest('button')) {
+        cursorDot.classList.add('active')
+        cursorRing.classList.add('active')
+        setIsHovering(true)
+      } else {
+        cursorDot.classList.remove('active')
+        cursorRing.classList.remove('active')
+        setIsHovering(false)
       }
     }
 
     window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mousedown', handleMouseDown)
-    window.addEventListener('mouseup', handleMouseUp)
-    window.addEventListener('mouseenter', handleMouseEnter, true)
-    window.addEventListener('mouseleave', handleMouseLeave, true)
+    window.addEventListener('mouseover', handleMouseOver)
 
     return () => {
+      document.body.removeChild(cursorDot)
+      document.body.removeChild(cursorRing)
       window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mousedown', handleMouseDown)
-      window.removeEventListener('mouseup', handleMouseUp)
-      window.removeEventListener('mouseenter', handleMouseEnter, true)
-      window.removeEventListener('mouseleave', handleMouseLeave, true)
+      window.removeEventListener('mouseover', handleMouseOver)
     }
   }, [])
 
-  // Cursor trail effect
+  // Particle trail effect
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -253,13 +249,19 @@ export function AeronauticalInterface() {
     }> = []
 
     const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY })
+
+      for (let i = 0; i < 3; i++) {
       for (let i = 0; i < 2; i++) {
         particles.push({
           x: e.clientX,
           y: e.clientY,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
           vx: (Math.random() - 0.5) * 1.5,
           vy: (Math.random() - 0.5) * 1.5,
           life: 1,
+          size: Math.random() * 3 + 1
           size: Math.random() * 2 + 1
         })
       }
@@ -272,6 +274,8 @@ export function AeronauticalInterface() {
         const p = particles[i]
         p.x += p.vx
         p.y += p.vy
+        p.life -= 0.02
+        p.size *= 0.98
         p.life -= 0.03
         p.size *= 0.97
 
@@ -282,7 +286,8 @@ export function AeronauticalInterface() {
 
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(0, 255, 200, ${p.life * 0.4})`
+        ctx.fillStyle = `rgba(0, 255, 200, ${p.life * 0.6})`
+        ctx.fillStyle = `rgba(0, 212, 255, ${p.life * 0.4})`
         ctx.fill()
       }
 
@@ -405,9 +410,6 @@ export function AeronauticalInterface() {
 
   return (
     <div className="aero-shell" data-active={active}>
-      {/* Custom Cursor */}
-      <div ref={cursorDotRef} className="cursor-dot" />
-      <div ref={cursorRingRef} className="cursor-ring" />
       <canvas ref={canvasRef} className="cursor-canvas" aria-hidden="true" />
 
       {/* Animated background with flight path */}
@@ -456,11 +458,11 @@ export function AeronauticalInterface() {
         <nav className="navigation-panel" aria-label="Primary navigation">
           <a className="pilot-badge" href="#top" aria-label="Jude Dominic Yap, home">
             <div className="badge-emblem">
-              <Plane size={18} />
+              <Plane size={20} />
             </div>
             <div className="badge-info">
               <span>JDY</span>
-              <small>AERONAUTICAL ENGINEER</small>
+              <small>PILOT // AERONAUTICAL</small>
             </div>
           </a>
           <button
@@ -484,7 +486,7 @@ export function AeronauticalInterface() {
                   setIsMenuOpen(false)
                 }}
               >
-                <ChevronRight size={12} className="nav-indicator" />
+                <span className="nav-indicator">{String(index + 1).padStart(2, '0')}</span>
                 <span className="nav-label">{item.label}</span>
                 {active === item.id && <span className="nav-light" />}
               </a>
@@ -504,14 +506,14 @@ export function AeronauticalInterface() {
             <p className="call-sign"><span /> CLEARANCE GRANTED / 2026</p>
             <h1 id="hero-title">JUDE<br /><em>DOMINIC YAP</em></h1>
             <div className="pilot-rank">
-              <Rocket size={20} />
+              <Rocket size={24} />
               <h2>ASPIRING AERONAUTICAL ENGINEER</h2>
-              <Orbit size={20} />
+              <Orbit size={24} />
             </div>
             <p className="mission-brief">Grade 12 STEM student with ambitions soaring toward aerospace engineering. Passionate about aerodynamics, propulsion systems, and flight mechanics. Building a foundation in programming and engineering principles to navigate the skies of tomorrow.</p>
             <div className="pre-flight-checklist">
               <a href="#projects" className="thrust-button" onClick={() => engage('projects')}>
-                <Rocket size={16} />
+                <Rocket size={18} />
                 <span>VIEW PROJECT HANGAR</span>
               </a>
               <a href="#contact" className="comm-link" onClick={() => engage('contact')}>
@@ -526,6 +528,10 @@ export function AeronauticalInterface() {
               <div className="frame-corner bl" />
               <div className="frame-corner br" />
               <img src="/profile.jpg" alt="Jude Dominic Yap" />
+              <img src="/profile.jpg" alt="Jude Dominic Yap" onError={(e) => {
+                const target = e.target as HTMLImageElement
+                target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="500"%3E%3Crect fill="%231a2744" width="400" height="500"/%3E%3Ctext fill="%2300d4ff" font-family="monospace" font-size="20" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EPROFILE IMAGE%3C/text%3E%3C/svg%3E'
+              }} />
               <div className="hud-overlay" aria-hidden="true">
                 <div className="hud-line horizontal" />
                 <div className="hud-line vertical" />
@@ -545,33 +551,37 @@ export function AeronauticalInterface() {
             </div>
           </div>
           <a href="#about" className="descend-indicator" aria-label="Continue to about section">
-            <MoveDown size={16} />
+            <MoveDown size={18} />
             <span>DESCEND TO BRIEFING</span>
           </a>
         </section>
 
-        <Section id="about" index="01" title="PILOT PROFILE" active={active} onEngage={engage} icon={Target}>
+        <Section id="about" index="01" title="PILOT PROFILE" active={active} onEngage={engage}>
           <div className="briefing-grid">
             <p className="lead">I am a Grade 12 STEM student at Las Piñas National Senior High School – Talon Dos Campus, preparing for takeoff into the field of aeronautical engineering.</p>
             <p>My passion lies in understanding the principles of flight, aircraft design, and aerospace technology. Currently building my technical foundation through programming and engineering coursework while preparing for university-level aerospace studies.</p>
             <div className="flight-manual" aria-hidden="true">
-              <Plane size={40} />
+              <Plane size={48} />
               <b>ENGINEERING<br />AHEAD</b>
             </div>
           </div>
         </Section>
 
-        <Section id="skills" index="02" title="TECHNICAL SYSTEMS" active={active} onEngage={engage} icon={Code2}>
+        <Section id="skills" index="02" title="TECHNICAL SYSTEMS" active={active} onEngage={engage}>
           <div className="systems-array">
-            <SystemsCard code="SYS-01" title="Programming Languages" items={['Python']} status="OPERATIONAL" icon={Code2} />
-            <SystemsCard code="SYS-02" title="Engineering Tools" items={['Git', 'GitHub', 'Visual Studio Code']} status="ONLINE" icon={Gauge} />
-            <SystemsCard code="SYS-03" title="Core Competencies" items={['Problem Solving', 'Critical Thinking', 'Communication', 'Teamwork', 'Adaptability', 'Time Management']} status="DEVELOPING" wide icon={Wind} />
+            <SystemsCard code="SYS-01" title="Programming Languages" items={['Python']} status="OPERATIONAL" icon={<Code2 size={24} />} />
+            <SystemsCard code="SYS-02" title="Engineering Tools" items={['Git', 'GitHub', 'Visual Studio Code']} status="ONLINE" icon={<Gauge size={24} />} />
+            <SystemsCard code="SYS-03" title="Core Competencies" items={['Problem Solving', 'Critical Thinking', 'Communication', 'Teamwork', 'Adaptability', 'Time Management']} status="DEVELOPING" wide icon={<Wind size={24} />} />
+            <SystemsCard code="SYS-01" title="Programming Languages" items={['Python']} status="OPERATIONAL" icon={<Code2 size={24} />} index={0} />
+            <SystemsCard code="SYS-02" title="Engineering Tools" items={['Git', 'GitHub', 'Visual Studio Code']} status="ONLINE" icon={<Gauge size={24} />} index={1} />
+            <SystemsCard code="SYS-03" title="Core Competencies" items={['Problem Solving', 'Critical Thinking', 'Communication', 'Teamwork', 'Adaptability', 'Time Management']} status="DEVELOPING" wide icon={<Wind size={24} />} index={2} />
           </div>
         </Section>
 
-        <Section id="projects" index="03" title="PROJECT HANGAR" active={active} onEngage={engage} icon={Rocket}>
+        <Section id="projects" index="03" title="PROJECT HANGAR" active={active} onEngage={engage}>
           <div className="hangar-bay">
             {projects.map((project) => (
+            {projects.map((project, index) => (
               <AircraftBay
                 key={project.code}
                 code={project.code}
@@ -580,14 +590,15 @@ export function AeronauticalInterface() {
                 status={project.state}
                 tech={project.tech}
                 onClick={() => handleProjectClick(project)}
+                index={index}
               />
             ))}
           </div>
         </Section>
 
-        <Section id="education" index="04" title="FLIGHT LOG" active={active} onEngage={engage} icon={GraduationCap}>
-          <div className="flight-log visible">
-            <span className="log-date">2025<br/>— PRESENT</span>
+        <Section id="education" index="04" title="FLIGHT LOG" active={active} onEngage={engage}>
+          <div className="flight-log">
+            <span className="log-date">2025<br />— PRESENT</span>
             <div className="log-entry">
               <p className="log-type">CURRENT STATION</p>
               <h3>Las Piñas National Senior High School</h3>
@@ -595,8 +606,8 @@ export function AeronauticalInterface() {
             </div>
             <span className="progress-thrust" aria-label="Learning in progress"><i /></span>
           </div>
-          <div className="flight-log visible">
-            <span className="log-date">2016<br/>— 2025</span>
+          <div className="flight-log">
+            <span className="log-date">2016<br />— 2025</span>
             <div className="log-entry">
               <p className="log-type">PREVIOUS STATION</p>
               <h3>Las Piñas National High School</h3>
@@ -606,10 +617,10 @@ export function AeronauticalInterface() {
           </div>
         </Section>
 
-        <Section id="certificates" index="05" title="CREDENTIALS" active={active} onEngage={engage} icon={Award}>
+        <Section id="certificates" index="05" title="CERTIFICATIONS" active={active} onEngage={engage}>
           <div className="certificate-display">
-            <div className="certificate-plaque visible">
-              <span className="plaque-date">JULY<br/>2025</span>
+            <div className="certificate-plaque">
+              <span className="plaque-date">JULY<br />2025</span>
               <div className="plaque-content">
                 <p className="plaque-type">Certificate of Completion</p>
                 <h3>Introduction to Modern AI</h3>
@@ -617,8 +628,8 @@ export function AeronauticalInterface() {
                 <div className="plaque-seal">AI</div>
               </div>
             </div>
-            <div className="certificate-plaque visible">
-              <span className="plaque-date">AUGUST<br/>2026</span>
+            <div className="certificate-plaque">
+              <span className="plaque-date">AUGUST<br />2026</span>
               <div className="plaque-content">
                 <p className="plaque-type">Certificate of Completion</p>
                 <h3>Python Essentials 1</h3>
@@ -629,7 +640,7 @@ export function AeronauticalInterface() {
           </div>
         </Section>
 
-        <Section id="contact" index="06" title="COMMUNICATIONS" active={active} onEngage={engage} icon={Mail}>
+        <Section id="contact" index="06" title="COMMUNICATIONS" active={active} onEngage={engage}>
           <div className="comms-array">
             <div>
               <p className="lead">Communication channels are open.</p>
@@ -637,16 +648,19 @@ export function AeronauticalInterface() {
             </div>
             <div className="comms-links">
               <a href="https://linkedin.com/in/judedominicyap" target="_blank" rel="noreferrer" className="comm-channel">
+                <Linkedin size={18} />
                 <Linkedin size={16} />
                 <span>LinkedIn</span>
                 <ExternalLink size={14} />
               </a>
               <a href="https://github.com/JudeDominicYap" target="_blank" rel="noreferrer" className="comm-channel">
+                <Github size={18} />
                 <Github size={16} />
                 <span>GitHub</span>
                 <ExternalLink size={14} />
               </a>
               <a href="mailto:judedominic.yap@gmail.com" className="comm-channel">
+                <Mail size={18} />
                 <Mail size={16} />
                 <span>Email</span>
                 <ExternalLink size={14} />
@@ -654,7 +668,7 @@ export function AeronauticalInterface() {
             </div>
             <div className="comms-actions">
               <a href="mailto:judedominic.yap@gmail.com?subject=Aerospace Collaboration&body=Hi Jude, I'm interested in..." className="thrust-button">
-                <Mail size={16} />
+                <Mail size={18} />
                 <span>INITIATE CONTACT</span>
               </a>
             </div>
@@ -672,7 +686,7 @@ export function AeronauticalInterface() {
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         aria-label="Back to top"
       >
-        <ArrowUp size={18} />
+        <ArrowUp size={20} />
       </button>
 
       {modalProject && (
