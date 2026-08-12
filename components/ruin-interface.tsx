@@ -60,8 +60,22 @@ const projects = [
 ]
 
 const flightLogs: any[] = []
-const certificates: any[] = []
-
+const certificates = [
+  {
+    title: "Introduction to Modern AI",
+    issuer: "DICT-ITU DTC Initiative / Cisco Networking Academy",
+    date: "Jul 2025",
+    description: "Successfully completed the Introduction to Modern AI course offered by the DICT-ITU DTC Initiative through Cisco Networking Academy.",
+    link: "#"
+  },
+  {
+    title: "Python Essentials 1",
+    issuer: "Cisco Networking Academy",
+    date: "Aug 2026",
+    description: "Successfully completed Python Essentials 1 foundational programming and logic certification through Cisco Networking Academy.",
+    link: "#"
+  }
+]
 interface SectionProps {
   id: string
   index: string
