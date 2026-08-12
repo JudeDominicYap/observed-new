@@ -59,7 +59,27 @@ const projects = [
   }
 ]
 
-const flightLogs: any[] = []
+const flightLogs = [
+  {
+    role: "Senior High School Student",
+    organization: "Las Piñas National Senior High School - Talon Dos Campus",
+    period: "2025 – Present",
+    details: [
+      "Currently pursuing Senior High School studies with a focus on foundational academic and technical subjects.",
+      "Preparing for aerospace and engineering degree programs."
+    ]
+  },
+  {
+    role: "High School Student",
+    organization: "Las Piñas National High School - Almanza",
+    period: "2016 – 2025",
+    details: [
+      "Successfully completed junior high school secondary education.",
+      "Developed foundational skills in mathematics, science, and technology."
+    ]
+  }
+]
+
 const certificates = [
   {
     title: "Introduction to Modern AI",
