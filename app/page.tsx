@@ -1,5 +1,5 @@
-import { RuinInterface } from '@/components/ruin-interface'
+import { AeronauticalInterface } from '@/components/ruin-interface'
 
 export default function Page() {
-  return <RuinInterface />
+  return <AeronauticalInterface />
 }

@@ -1,15 +1,127 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { ArrowUp, Code2, Link, Mail, MoveDown } from 'lucide-react'
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { ArrowUp, Plane, Mail, MoveDown, Github, Linkedin, ExternalLink, Rocket, Wind, Gauge, Orbit } from 'lucide-react'
 
-const navItems = ['about', 'skills', 'projects', 'education', 'certificates', 'contact']
+const navItems = [
+  { id: 'about', label: 'About' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'education', label: 'Education' },
+  { id: 'certificates', label: 'Certificates' },
+  { id: 'contact', label: 'Contact' }
+]
 
-export function RuinInterface() {
-  const eyeRef = useRef<HTMLDivElement>(null)
+const projects = [
+  {
+    code: 'AERO-001',
+    title: 'Facial Recognition System',
+    description: 'A Facial Recognition System built using Python and OpenCV. Potential applications in automated airport security systems and pilot identification protocols.',
+    state: 'ACTIVE',
+    tech: ['Python', 'OpenCV', 'Machine Learning'],
+    link: '#'
+  },
+  {
+    code: 'AERO-002',
+    title: 'Developer Mini Projects',
+    description: 'A growing collection of creative mini projects demonstrating programming fundamentals and problem-solving methodologies essential for aerospace engineering.',
+    state: 'IN_PROGRESS',
+    tech: ['Python', 'JavaScript', 'Git'],
+    link: 'https://github.com/JudeDominicYap'
+  },
+  {
+    code: 'AERO-003',
+    title: 'Future Aerospace Projects',
+    description: 'This hangar will house future aeronautical and aerospace engineering projects including flight simulations, aerodynamics analysis, and propulsion systems.',
+    state: 'STANDBY',
+    tech: ['Coming Soon'],
+    link: '#'
+  }
+]
+
+export function AeronauticalInterface() {
+  const radarRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
   const [active, setActive] = useState('about')
   const [showTop, setShowTop] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [modalProject, setModalProject] = useState<typeof projects[0] | null>(null)
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [altitude, setAltitude] = useState(0)
+  const [speed, setSpeed] = useState(0)
+  
+  const engage = useCallback((id: string) => setActive(id), [])
 
+  // Custom cursor trail effect
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+    
+    const particles: Array<{
+      x: number
+      y: number
+      vx: number
+      vy: number
+      life: number
+      size: number
+    }> = []
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY })
+      
+      // Add particles on mouse move
+      for (let i = 0; i < 3; i++) {
+        particles.push({
+          x: e.clientX,
+          y: e.clientY,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          life: 1,
+          size: Math.random() * 3 + 1
+        })
+      }
+    }
+    
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      
+      // Update and draw particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i]
+        p.x += p.vx
+        p.y += p.vy
+        p.life -= 0.02
+        p.size *= 0.98
+        
+        if (p.life <= 0) {
+          particles.splice(i, 1)
+          continue
+        }
+        
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(0, 255, 200, ${p.life * 0.6})`
+        ctx.fill()
+      }
+      
+      requestAnimationFrame(animate)
+    }
+    
+    window.addEventListener('mousemove', handleMouseMove)
+    animate()
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+    }
+  }, [])
+
+  // Radar observer effect
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     let frame = 0
@@ -27,24 +139,24 @@ export function RuinInterface() {
     ]
 
     const relocate = (avoidX = -1000, avoidY = -1000) => {
-      if (!eyeRef.current) return
+      if (!radarRef.current) return
       const options = perches()
         .map((perch, index) => ({ ...perch, index, distance: Math.hypot(perch.x - avoidX, perch.y - avoidY) }))
         .filter((perch) => perch.index !== currentPerch && perch.distance > 180)
       const next = options[Math.floor(Math.random() * options.length)] ?? perches()[0]
       currentPerch = next.index ?? 0
-      eyeRef.current.classList.add('relocating')
-      eyeRef.current.style.setProperty('--observer-x', `${Math.round(next.x)}px`)
-      eyeRef.current.style.setProperty('--observer-y', `${Math.round(next.y)}px`)
-      window.setTimeout(() => eyeRef.current?.classList.remove('relocating'), 320)
+      radarRef.current.classList.add('relocating')
+      radarRef.current.style.setProperty('--radar-x', `${Math.round(next.x)}px`)
+      radarRef.current.style.setProperty('--radar-y', `${Math.round(next.y)}px`)
+      window.setTimeout(() => radarRef.current?.classList.remove('relocating'), 320)
     }
 
     const aim = (clientX: number, clientY: number) => {
-      if (reduced || !eyeRef.current) return
+      if (reduced || !radarRef.current) return
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(() => {
-        const rect = eyeRef.current?.getBoundingClientRect()
-        if (!rect || !eyeRef.current) return
+        const rect = radarRef.current?.getBoundingClientRect()
+        if (!rect || !radarRef.current) return
         const dx = clientX - (rect.left + rect.width / 2)
         const dy = clientY - (rect.top + rect.height / 2)
         const distance = Math.max(1, Math.hypot(dx, dy))
@@ -53,17 +165,17 @@ export function RuinInterface() {
           relocate(clientX, clientY)
           return
         }
-        eyeRef.current.style.setProperty('--eye-x', `${(dx / distance) * 5}px`)
-        eyeRef.current.style.setProperty('--eye-y', `${(dy / distance) * 4}px`)
-        eyeRef.current.style.setProperty('--eye-angle', `${Math.atan2(dy, dx) * (180 / Math.PI)}deg`)
+        radarRef.current.style.setProperty('--radar-dot-x', `${(dx / distance) * 5}px`)
+        radarRef.current.style.setProperty('--radar-dot-y', `${(dy / distance) * 4}px`)
+        radarRef.current.style.setProperty('--radar-angle', `${Math.atan2(dy, dx) * (180 / Math.PI)}deg`)
       })
     }
 
     const idleScan = () => {
-      if (reduced || !eyeRef.current) return
+      if (reduced || !radarRef.current) return
       const time = Date.now() / 1300
-      eyeRef.current.style.setProperty('--eye-x', `${Math.sin(time) * 6}px`)
-      eyeRef.current.style.setProperty('--eye-y', `${Math.cos(time * 0.7) * 3}px`)
+      radarRef.current.style.setProperty('--radar-dot-x', `${Math.sin(time) * 6}px`)
+      radarRef.current.style.setProperty('--radar-dot-y', `${Math.cos(time * 0.7) * 3}px`)
       idleFrame = requestAnimationFrame(idleScan)
     }
 
@@ -74,7 +186,12 @@ export function RuinInterface() {
       if (event.pointerType === 'touch') idleTimer = window.setTimeout(idleScan, 1800)
     }
 
-    const handleScroll = () => setShowTop(window.scrollY > 520)
+    const handleScroll = () => {
+      setShowTop(window.scrollY > 520)
+      setAltitude(Math.floor(window.scrollY / 10))
+      setSpeed(Math.min(100, Math.floor(window.scrollY / 50)))
+    }
+    
     const sections = navItems.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[]
     const observer = new IntersectionObserver(
       (entries) => {
@@ -102,164 +219,268 @@ export function RuinInterface() {
     }
   }, [])
 
-  const engage = (id: string) => setActive(id)
+  const handleProjectClick = (project: typeof projects[0]) => {
+    if (project.link && project.link !== '#') {
+      window.open(project.link, '_blank', 'noopener,noreferrer')
+    } else {
+      setModalProject(project)
+    }
+  }
 
   return (
-    <div className="ruin-shell" data-active={active}>
-      <div className="world-backdrop" aria-hidden="true">
-        <div className="distant-towers" />
-        <div className="pixel-fog fog-one" />
-        <div className="pixel-fog fog-two" />
-        <div className="spore-field" />
-        <div className="utility-spine"><i /><i /><i /><i /><i /><i /></div>
-      </div>
-
-      <div className="mechanical-observer" ref={eyeRef} aria-hidden="true">
-        <div className="observer-cable" />
-        <div className="observer-bracket" />
-        <div className="observer-body">
-          <span className="observer-rivet rivet-one" />
-          <span className="observer-rivet rivet-two" />
-          <div className="observer-lid">
-            <div className="observer-eye"><span className="observer-pupil" /></div>
-          </div>
-          <span className="observer-signal" />
+    <div className="aero-shell" data-active={active}>
+      <canvas ref={canvasRef} className="cursor-canvas" aria-hidden="true" />
+      
+      {/* Animated background with flight path */}
+      <div className="sky-backdrop" aria-hidden="true">
+        <div className="altitude-lines" />
+        <div className="cloud-layer cloud-one" />
+        <div className="cloud-layer cloud-two" />
+        <div className="star-field" />
+        <div className="flight-path">
+          <svg viewBox="0 0 1200 800" preserveAspectRatio="none">
+            <path className="flight-trail" d="M0,400 C200,350 400,450 600,400 S1000,350 1200,400" />
+            <circle className="waypoint" cx="200" cy="375" r="4" />
+            <circle className="waypoint" cx="600" cy="400" r="4" />
+            <circle className="waypoint" cx="1000" cy="375" r="4" />
+          </svg>
         </div>
-        <div className="observer-vine" />
-        <span className="observer-tag">IX·O3 / AWAKE</span>
+        <div className="instrument-panel">
+          <div className="gauge altitude-gauge">
+            <Gauge size={48} />
+            <span className="gauge-value">{altitude}</span>
+            <span className="gauge-label">ALTITUDE</span>
+          </div>
+          <div className="gauge speed-gauge">
+            <Wind size={48} />
+            <span className="gauge-value">{speed * 10}</span>
+            <span className="gauge-label">SPEED</span>
+          </div>
+        </div>
       </div>
 
-      <header className="site-header">
-        <nav className="navbar" aria-label="Primary navigation">
-          <a className="brand" href="#top" aria-label="Jude Dominic Yap, home">
-            <span className="brand-glyph">⌁</span><span>JDY</span><small>ARCHIVE // 12</small>
+      {/* Radar Observer - Aviation themed */}
+      <div className="radar-observer" ref={radarRef} aria-hidden="true">
+        <div className="radar-dish">
+          <div className="radar-screen">
+            <div className="radar-sweep" />
+            <div className="radar-blip" />
+            <div className="radar-grid" />
+          </div>
+        </div>
+        <div className="radar-base" />
+        <div className="radar-antenna" />
+        <span className="radar-tag">RADAR // ACTIVE</span>
+      </div>
+
+      <header className="cockpit-header">
+        <nav className="navigation-panel" aria-label="Primary navigation">
+          <a className="pilot-badge" href="#top" aria-label="Jude Dominic Yap, home">
+            <div className="badge-emblem">
+              <Plane size={20} />
+            </div>
+            <div className="badge-info">
+              <span>JDY</span>
+              <small>PILOT // AERONAUTICAL</small>
+            </div>
           </a>
-          <div className="nav-links">
+          <button 
+            className="mobile-menu-toggle" 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+            aria-expanded={isMenuOpen}
+          >
+            <span className="hamburger-line" />
+            <span className="hamburger-line" />
+            <span className="hamburger-line" />
+          </button>
+          <div className={`nav-instruments ${isMenuOpen ? 'open' : ''}`}>
             {navItems.map((item, index) => (
-              <a key={item} href={`#${item}`} className={active === item ? 'active' : ''} onClick={() => engage(item)}>
-                <span>{String(index + 1).padStart(2, '0')}</span>{item}
+              <a 
+                key={item.id} 
+                href={`#${item.id}`} 
+                className={active === item.id ? 'active' : ''} 
+                onClick={() => {
+                  engage(item.id)
+                  setIsMenuOpen(false)
+                }}
+              >
+                <span className="nav-indicator">{String(index + 1).padStart(2, '0')}</span>
+                <span className="nav-label">{item.label}</span>
+                {active === item.id && <span className="nav-light" />}
               </a>
             ))}
           </div>
-          <span className="system-status"><i /> ECOSYSTEM ACTIVE</span>
+          <div className="flight-status">
+            <span className="status-light" />
+            <span>SYSTEMS ONLINE</span>
+          </div>
         </nav>
       </header>
 
       <main id="top">
-        <section className="hero chamber" aria-labelledby="hero-title">
-          <div className="chamber-code" aria-hidden="true">SECTOR Λ-17 · SIGNAL RESTORED</div>
-          <div className="hero-copy">
-            <p className="eyebrow"><span /> FOUND TRANSMISSION / 2026</p>
+        <section className="hero hangar" aria-labelledby="hero-title">
+          <div className="hangar-designator" aria-hidden="true">HANGAR A-17 · FLIGHT READY</div>
+          <div className="hero-cockpit">
+            <p className="call-sign"><span /> CLEARANCE GRANTED / 2026</p>
             <h1 id="hero-title">JUDE<br /><em>DOMINIC YAP</em></h1>
-            <h2>Aspiring Engineer</h2>
-            <p className="hero-description">Grade 12 STEM student passionate about engineering, Python programming, and technology. I enjoy solving problems, learning new skills, and building projects that challenge me to grow.</p>
-            <div className="hero-actions">
-              <a href="#projects" className="industrial-button" onClick={() => engage('projects')}>Open project archive <span>→</span></a>
-              <a href="#contact" className="text-link" onClick={() => engage('contact')}>Establish contact</a>
+            <div className="pilot-rank">
+              <Rocket size={24} />
+              <h2>ASPIRING AERONAUTICAL ENGINEER</h2>
+              <Orbit size={24} />
+            </div>
+            <p className="mission-brief">Grade 12 STEM student with ambitions soaring toward aerospace engineering. Passionate about aerodynamics, propulsion systems, and flight mechanics. Building a foundation in programming and engineering principles to navigate the skies of tomorrow.</p>
+            <div className="pre-flight-checklist">
+              <a href="#projects" className="thrust-button" onClick={() => engage('projects')}>
+                <Rocket size={18} />
+                <span>VIEW PROJECT HANGAR</span>
+              </a>
+              <a href="#contact" className="comm-link" onClick={() => engage('contact')}>
+                <span>ESTABLISH COMMUNICATION</span>
+              </a>
             </div>
           </div>
-          <div className="portrait-bay">
-            <div className="portrait-frame">
+          <div className="pilot-profile">
+            <div className="profile-frame">
+              <div className="frame-corner tl" />
+              <div className="frame-corner tr" />
+              <div className="frame-corner bl" />
+              <div className="frame-corner br" />
               <img src="/observed-new/profile.jpg" alt="Jude Dominic Yap" />
-              <div className="portrait-scan" aria-hidden="true" />
-              <span className="corner c1" /><span className="corner c2" /><span className="corner c3" /><span className="corner c4" />
+              <div className="hud-overlay" aria-hidden="true">
+                <div className="hud-line horizontal" />
+                <div className="hud-line vertical" />
+                <div className="hud-circle" />
+                <div className="hud-target" />
+              </div>
             </div>
-            <div className="bio-readout"><span>SUBJECT: JDY</span><span>STATUS: LEARNING</span><span>PATH: ENGINEERING</span></div>
-            <div className="hanging-vine" aria-hidden="true"><i /><i /><i /><i /></div>
+            <div className="pilot-data">
+              <div className="data-row"><span>PILOT:</span><span>JDY</span></div>
+              <div className="data-row"><span>STATUS:</span><span>TRAINING</span></div>
+              <div className="data-row"><span>TRAJECTORY:</span><span>AERONAUTICS</span></div>
+            </div>
+            <div className="jet-stream" aria-hidden="true">
+              <div className="stream" />
+              <div className="stream" />
+              <div className="stream" />
+            </div>
           </div>
-          <a href="#about" className="descent" aria-label="Continue to about section"><MoveDown size={18} /> DESCEND INTO ARCHIVE</a>
+          <a href="#about" className="descend-indicator" aria-label="Continue to about section">
+            <MoveDown size={18} />
+            <span>DESCEND TO BRIEFING</span>
+          </a>
         </section>
 
-        <Section id="about" index="I" title="Recovered Profile" active={active} onEngage={engage}>
-          <div className="story-grid">
-            <p className="lead">I am a Grade 12 STEM student at Las Piñas National Senior High School – Talon Dos Campus.</p>
-            <p>My interests include engineering, programming, and emerging technologies. I&apos;m currently strengthening my technical foundation while preparing for an engineering degree.</p>
-            <div className="artifact" aria-hidden="true"><span>⌁⌁</span><i /><b>KNOWLEDGE<br />PERSISTS</b></div>
+        <Section id="about" index="01" title="PILOT PROFILE" active={active} onEngage={engage}>
+          <div className="briefing-grid">
+            <p className="lead">I am a Grade 12 STEM student at Las Piñas National Senior High School – Talon Dos Campus, preparing for takeoff into the field of aeronautical engineering.</p>
+            <p>My passion lies in understanding the principles of flight, aircraft design, and aerospace technology. Currently building my technical foundation through programming and engineering coursework while preparing for university-level aerospace studies.</p>
+            <div className="flight-manual" aria-hidden="true">
+              <Plane size={48} />
+              <div className="manual-lines" />
+              <b>ENGINEERING<br />AHEAD</b>
+            </div>
           </div>
         </Section>
 
-        <Section id="skills" index="II" title="Operational Systems" active={active} onEngage={engage}>
-          <div className="systems-grid">
-            <ArchiveCard code="SYS / 01" title="Programming" items={['Python']} signal="STABLE" />
-            <ArchiveCard code="SYS / 02" title="Tools" items={['Git', 'GitHub', 'Visual Studio Code']} signal="ONLINE" />
-            <ArchiveCard code="SYS / 03" title="Human Protocols" items={['Problem Solving', 'Critical Thinking', 'Communication', 'Teamwork', 'Adaptability', 'Time Management']} signal="GROWING" wide />
+        <Section id="skills" index="02" title="TECHNICAL SYSTEMS" active={active} onEngage={engage}>
+          <div className="systems-array">
+            <SystemsCard code="SYS-01" title="Programming Languages" items={['Python']} status="OPERATIONAL" icon={<Code2 size={24} />} />
+            <SystemsCard code="SYS-02" title="Engineering Tools" items={['Git', 'GitHub', 'Visual Studio Code']} status="ONLINE" icon={<Gauge size={24} />} />
+            <SystemsCard code="SYS-03" title="Core Competencies" items={['Problem Solving', 'Critical Thinking', 'Communication', 'Teamwork', 'Adaptability', 'Time Management']} status="DEVELOPING" wide icon={<Wind size={24} />} />
           </div>
         </Section>
 
-        <Section id="projects" index="III" title="Created Projects" active={active} onEngage={engage}>
-          <div className="project-grid">
-            <Project code="A-001" title="Facial Recognition System" text="A Facial Recognition System built using Python and OpenCV." state="CREATING" />
-            <Project code="A-002" title="Developer Mini Projects" text="A growing collection of creative mini projects demonstrating programming fundamentals." state="PROGRESSING" />
-            <Project code="A-003" title="Future Engineering Projects" text="This chamber will house future engineering and technology projects." state="AWAITING" />
+        <Section id="projects" index="03" title="PROJECT HANGAR" active={active} onEngage={engage}>
+          <div className="hangar-bay">
+            {projects.map((project) => (
+              <AircraftBay
+                key={project.code}
+                code={project.code}
+                title={project.title}
+                text={project.description}
+                status={project.state}
+                tech={project.tech}
+                onClick={() => handleProjectClick(project)}
+              />
+            ))}
           </div>
         </Section>
 
-        <Section id="education" index="IV" title="Learning Chronicle" active={active} onEngage={engage}>
-          <div className="chronicle">
-            <span className="chronicle-year">2025<br />— NOW</span>
-            <div><p className="micro-label">ACTIVE INSTITUTION</p><h3>Las Piñas National Senior High School</h3><p>Talon Dos Campus · STEM Strand</p></div>
-            <span className="growth-meter" aria-label="Learning in progress"><i /></span>
+        <Section id="education" index="04" title="FLIGHT LOG" active={active} onEngage={engage}>
+          <div className="flight-log">
+            <span className="log-date">2025<br />— PRESENT</span>
+            <div className="log-entry">
+              <p className="log-type">CURRENT STATION</p>
+              <h3>Las Piñas National Senior High School</h3>
+              <p>Talon Dos Campus · STEM Strand</p>
+            </div>
+            <span className="progress-thrust" aria-label="Learning in progress"><i /></span>
           </div>
-          <div className="chronicle">
-            <span className="chronicle-year">2016<br />— 2025</span>
-            <div><p className="micro-label">PREVIOUS INSTITUTION</p><h3>Las Piñas National High School</h3><p>Almanza</p></div>
-            <span className="growth-meter" aria-label="Learning in progress"><i /></span>
+          <div className="flight-log">
+            <span className="log-date">2016<br />— 2025</span>
+            <div className="log-entry">
+              <p className="log-type">PREVIOUS STATION</p>
+              <h3>Las Piñas National High School</h3>
+              <p>Almanza</p>
+            </div>
+            <span className="progress-thrust" aria-label="Learning completed"><i /></span>
           </div>
         </Section>
 
-        <Section id="certificates" index="V" title="Sealed Records" active={active} onEngage={engage}>
-          <div className="sealed-record">
-            <div className="seal" aria-hidden="true">◇<span>⌁</span></div>
-            <div><p className="micro-label">ARCHIVE CHAMBER LOCKED</p><h3>New records are taking root.</h3><p>Certificates and milestones will surface here as they are recovered.</p></div>
+        <Section id="certificates" index="05" title="CERTIFICATIONS" active={active} onEngage={engage}>
+          <div className="certificate-dock">
+            <div className="dock-empty">
+              <div className="dock-symbol">◇<span>⌁</span></div>
+              <div><p className="micro-label">CERTIFICATION DOCK AVAILABLE</p><h3>New certifications incoming.</h3><p>Aerospace and engineering certifications will be logged here as they are earned.</p></div>
+            </div>
           </div>
         </Section>
         
-        <Section id="certificates" index="V" title="Unsealed Records" active={active} onEngage={engage}>
-           <div><p className="micro-label">New Records Have Taken Root</p></div>
-          <div className="sealed-record">
-            <span className="seal">July<br />2025</span>
-            <div><p className="micro-label">Certificate of Completion</p><h3>Introduction to Modern AI</h3><p>offered by DICT-ITU DTC Initiative
-through the Cisco Networking Academy program.</p></div>
-          </div>
-          <div className="sealed-record">
-            <span className="seal">August<br />2026</span>
-            <div><p className="micro-label">Certificate of Completion</p><h3>Python Essentials 1</h3><p>offered by Networking Academy
-through the Cisco Networking Academy program.</p></div>
-          </div>
-        </Section>
-
-        <Section id="contact" index="VI" title="Open Transmission" active={active} onEngage={engage}>
-          <div className="contact-grid">
-            <div><p className="lead">The old network still listens.</p><p>Send a signal through any surviving channel.</p></div>
-            <div className="contact-links">
-              <a href="https://linkedin.com/in/judedominicyap" target="_blank" rel="noreferrer"><Link size={18} /> LinkedIn <span>↗</span></a>
-              <a href="https://github.com/JudeDominicYap" target="_blank" rel="noreferrer"><Code2 size={18} /> GitHub <span>↗</span></a>
-              <a href="mailto:judedominic.yap@gmail.com"><Mail size={18} /> Email <span>↗</span></a>
+        <Section id="certificates" index="05" title="EARNED CERTIFICATIONS" active={active} onEngage={engage}>
+          <div className="certificate-display">
+            <div className="certificate-plaque">
+              <span className="plaque-date">JULY<br />2025</span>
+              <div className="plaque-content">
+                <p className="plaque-type">Certificate of Completion</p>
+                <h3>Introduction to Modern AI</h3>
+                <p>Offered by DICT-ITU DTC Initiative through the Cisco Networking Academy program.</p>
+                <div className="plaque-seal">AI</div>
+              </div>
+            </div>
+            <div className="certificate-plaque">
+              <span className="plaque-date">AUGUST<br />2026</span>
+              <div className="plaque-content">
+                <p className="plaque-type">Certificate of Completion</p>
+                <h3>Python Essentials 1</h3>
+                <p>Offered by Cisco Networking Academy program.</p>
+                <div className="plaque-seal">PY</div>
+              </div>
             </div>
           </div>
         </Section>
-      </main>
 
-      <footer><span>JDY // ARCHIVE END ♡</span><p>© 2026 Jude Dominic Yap. All Rights Reserved.</p><span>THE GARDEN REMEMBERS</span></footer>
-      <button className={`top-button ${showTop ? 'visible' : ''}`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top"><ArrowUp size={18} /></button>
-    </div>
-  )
-}
-
-function Section({ id, index, title, active, onEngage, children }: { id: string; index: string; title: string; active: string; onEngage: (id: string) => void; children: React.ReactNode }) {
-  return (
-    <section id={id} className={`section chamber ${active === id ? 'engaged' : ''}`} onMouseEnter={() => onEngage(id)} onFocusCapture={() => onEngage(id)} aria-labelledby={`${id}-title`}>
-      <div className="section-node" aria-hidden="true"><i /></div>
-      <header className="section-heading"><span>{index}</span><div><p>CHAMBER {index} / RECOVERED</p><h2 id={`${id}-title`}>{title}</h2></div><b>⌁⌁⌁</b></header>
-      {children}
-    </section>
-  )
-}
-
-function ArchiveCard({ code, title, items, signal, wide = false }: { code: string; title: string; items: string[]; signal: string; wide?: boolean }) {
-  return <article className={`archive-card ${wide ? 'wide' : ''}`}><div className="card-top"><span>{code}</span><i />{signal}</div><h3>{title}</h3><ul>{items.map((item) => <li key={item}>{item}</li>)}</ul><div className="card-moss" aria-hidden="true" /></article>
-}
-
-function Project({ code, title, text, state }: { code: string; title: string; text: string; state: string }) {
-  return <article className="project-card"><div className="project-code">{code}<span>{state}</span></div><div className="project-window" aria-hidden="true"><i /><i /><i /><b /></div><h3>{title}</h3><p>{text}</p><span className="root-line" aria-hidden="true" /></article>
-}
+        <Section id="contact" index="06" title="COMMUNICATIONS" active={active} onEngage={engage}>
+          <div className="comms-array">
+            <div><p className="lead">Communication channels are open.</p><p>Reach out through any available frequency.</p></div>
+            <div className="comms-links">
+              <a href="https://linkedin.com/in/judedominicyap" target="_blank" rel="noreferrer" className="comm-channel">
+                <Linkedin size={18} />
+                <span>LinkedIn</span>
+                <ExternalLink size={14} />
+              </a>
+              <a href="https://github.com/JudeDominicYap" target="_blank" rel="noreferrer" className="comm-channel">
+                <Github size={18} />
+                <span>GitHub</span>
+                <ExternalLink size={14} />
+              </a>
+              <a href="mailto:judedominic.yap@gmail.com" className="comm-channel">
+                <Mail size={18} />
+                <span>Email</span>
+                <ExternalLink size={14} />
+              </a>
+            </div>
+            <div className="comms-actions">
+              <a href="mailto:judedominic.yap@gmail.com?subject=Aerospace Collaboration&body=Hi Jude, I'm interested in..." className="thrust-button">
+                <Mail size={18} />
+               
