@@ -43,8 +43,28 @@ const projects = [
 ]
 
 function Section({ id, index, title, active, onEngage, children }: { id: string; index: string; title: string; active: string; onEngage: (id: string) => void; children: React.ReactNode }) {
+  const sectionRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          sectionRef.current?.classList.add('visible')
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <section 
+      ref={sectionRef}
       id={id} 
       className={`section ${active === id ? 'engaged' : ''}`}
       onMouseEnter={() => onEngage(id)}
@@ -59,9 +79,30 @@ function Section({ id, index, title, active, onEngage, children }: { id: string;
   )
 }
 
-function SystemsCard({ code, title, items, status, wide, icon }: { code: string; title: string; items: string[]; status: string; wide?: boolean; icon: React.ReactNode }) {
+function SystemsCard({ code, title, items, status, wide, icon, index }: { code: string; title: string; items: string[]; status: string; wide?: boolean; icon: React.ReactNode; index: number }) {
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            cardRef.current?.classList.add('visible')
+          }, index * 100)
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [index])
+
   return (
-    <div className={`system-card ${wide ? 'wide' : ''}`}>
+    <div ref={cardRef} className={`system-card ${wide ? 'wide' : ''}`}>
       <div className="card-top">
         {icon}
         <span>{code}</span>
@@ -78,9 +119,30 @@ function SystemsCard({ code, title, items, status, wide, icon }: { code: string;
   )
 }
 
-function AircraftBay({ code, title, text, status, tech, onClick }: { code: string; title: string; text: string; status: string; tech: string[]; onClick: () => void }) {
+function AircraftBay({ code, title, text, status, tech, onClick, index }: { code: string; title: string; text: string; status: string; tech: string[]; onClick: () => void; index: number }) {
+  const bayRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            bayRef.current?.classList.add('visible')
+          }, index * 150)
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (bayRef.current) {
+      observer.observe(bayRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [index])
+
   return (
-    <div className="aircraft-bay" onClick={onClick}>
+    <div ref={bayRef} className="aircraft-bay" onClick={onClick}>
       <div className="project-code">
         <span>{code}</span>
         <span>{status}</span>
@@ -113,10 +175,55 @@ export function AeronauticalInterface() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [altitude, setAltitude] = useState(0)
   const [speed, setSpeed] = useState(0)
+  const [isHovering, setIsHovering] = useState(false)
 
   const engage = useCallback((id: string) => setActive(id), [])
 
-  // Custom cursor trail effect
+  // Custom cursor effect
+  useEffect(() => {
+    const cursorDot = document.createElement('div')
+    cursorDot.className = 'cursor-dot'
+    document.body.appendChild(cursorDot)
+
+    const cursorRing = document.createElement('div')
+    cursorRing.className = 'cursor-ring'
+    document.body.appendChild(cursorRing)
+
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY })
+      
+      cursorDot.style.left = `${e.clientX}px`
+      cursorDot.style.top = `${e.clientY}px`
+      
+      cursorRing.style.left = `${e.clientX}px`
+      cursorRing.style.top = `${e.clientY}px`
+    }
+
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === 'A' || target.tagName === 'BUTTON' || target.closest('a') || target.closest('button')) {
+        cursorDot.classList.add('active')
+        cursorRing.classList.add('active')
+        setIsHovering(true)
+      } else {
+        cursorDot.classList.remove('active')
+        cursorRing.classList.remove('active')
+        setIsHovering(false)
+      }
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseover', handleMouseOver)
+
+    return () => {
+      document.body.removeChild(cursorDot)
+      document.body.removeChild(cursorRing)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseover', handleMouseOver)
+    }
+  }, [])
+
+  // Particle trail effect
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -137,16 +244,14 @@ export function AeronauticalInterface() {
     }> = []
 
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY })
-
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 2; i++) {
         particles.push({
           x: e.clientX,
           y: e.clientY,
-          vx: (Math.random() - 0.5) * 2,
-          vy: (Math.random() - 0.5) * 2,
+          vx: (Math.random() - 0.5) * 1.5,
+          vy: (Math.random() - 0.5) * 1.5,
           life: 1,
-          size: Math.random() * 3 + 1
+          size: Math.random() * 2 + 1
         })
       }
     }
@@ -158,8 +263,8 @@ export function AeronauticalInterface() {
         const p = particles[i]
         p.x += p.vx
         p.y += p.vy
-        p.life -= 0.02
-        p.size *= 0.98
+        p.life -= 0.03
+        p.size *= 0.97
 
         if (p.life <= 0) {
           particles.splice(i, 1)
@@ -168,7 +273,7 @@ export function AeronauticalInterface() {
 
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(0, 255, 200, ${p.life * 0.6})`
+        ctx.fillStyle = `rgba(0, 212, 255, ${p.life * 0.4})`
         ctx.fill()
       }
 
@@ -408,7 +513,10 @@ export function AeronauticalInterface() {
               <div className="frame-corner tr" />
               <div className="frame-corner bl" />
               <div className="frame-corner br" />
-              <img src="/profile.jpg" alt="Jude Dominic Yap" />
+              <img src="/profile.jpg" alt="Jude Dominic Yap" onError={(e) => {
+                const target = e.target as HTMLImageElement
+                target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="500"%3E%3Crect fill="%231a2744" width="400" height="500"/%3E%3Ctext fill="%2300d4ff" font-family="monospace" font-size="20" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EPROFILE IMAGE%3C/text%3E%3C/svg%3E'
+              }} />
               <div className="hud-overlay" aria-hidden="true">
                 <div className="hud-line horizontal" />
                 <div className="hud-line vertical" />
@@ -446,15 +554,15 @@ export function AeronauticalInterface() {
 
         <Section id="skills" index="02" title="TECHNICAL SYSTEMS" active={active} onEngage={engage}>
           <div className="systems-array">
-            <SystemsCard code="SYS-01" title="Programming Languages" items={['Python']} status="OPERATIONAL" icon={<Code2 size={24} />} />
-            <SystemsCard code="SYS-02" title="Engineering Tools" items={['Git', 'GitHub', 'Visual Studio Code']} status="ONLINE" icon={<Gauge size={24} />} />
-            <SystemsCard code="SYS-03" title="Core Competencies" items={['Problem Solving', 'Critical Thinking', 'Communication', 'Teamwork', 'Adaptability', 'Time Management']} status="DEVELOPING" wide icon={<Wind size={24} />} />
+            <SystemsCard code="SYS-01" title="Programming Languages" items={['Python']} status="OPERATIONAL" icon={<Code2 size={24} />} index={0} />
+            <SystemsCard code="SYS-02" title="Engineering Tools" items={['Git', 'GitHub', 'Visual Studio Code']} status="ONLINE" icon={<Gauge size={24} />} index={1} />
+            <SystemsCard code="SYS-03" title="Core Competencies" items={['Problem Solving', 'Critical Thinking', 'Communication', 'Teamwork', 'Adaptability', 'Time Management']} status="DEVELOPING" wide icon={<Wind size={24} />} index={2} />
           </div>
         </Section>
 
         <Section id="projects" index="03" title="PROJECT HANGAR" active={active} onEngage={engage}>
           <div className="hangar-bay">
-            {projects.map((project) => (
+            {projects.map((project, index) => (
               <AircraftBay
                 key={project.code}
                 code={project.code}
@@ -463,6 +571,7 @@ export function AeronauticalInterface() {
                 status={project.state}
                 tech={project.tech}
                 onClick={() => handleProjectClick(project)}
+                index={index}
               />
             ))}
           </div>
@@ -520,17 +629,17 @@ export function AeronauticalInterface() {
             </div>
             <div className="comms-links">
               <a href="https://linkedin.com/in/judedominicyap" target="_blank" rel="noreferrer" className="comm-channel">
-                <Linkedin size={18} />
+                <Linkedin size={16} />
                 <span>LinkedIn</span>
                 <ExternalLink size={14} />
               </a>
               <a href="https://github.com/JudeDominicYap" target="_blank" rel="noreferrer" className="comm-channel">
-                <Github size={18} />
+                <Github size={16} />
                 <span>GitHub</span>
                 <ExternalLink size={14} />
               </a>
               <a href="mailto:judedominic.yap@gmail.com" className="comm-channel">
-                <Mail size={18} />
+                <Mail size={16} />
                 <span>Email</span>
                 <ExternalLink size={14} />
               </a>
