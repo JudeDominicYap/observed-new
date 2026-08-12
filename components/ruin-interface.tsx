@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { ArrowUp, Plane, Mail, MoveDown, ExternalLink, Rocket, Wind, Gauge, Orbit, Code2, ChevronRight, Target, GraduationCap } from 'lucide-react'
 import { ArrowUp, Plane, Mail, MoveDown, ExternalLink, Rocket, Wind, Gauge, Orbit, Code2, ChevronRight, Target, GraduationCap, Award } from 'lucide-react'
 
 const Github = (props: any) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.02c3.18-.35 6.52-1.54 6.52-7.1a5.3 5.3 0 0 0-1.5-3.75 5.1 5.1 0 0 0-.1-3.8s-1.1-.35-3.5 1.25a12.8 12.8 0 0 0-7 0C6.1 2.3 5 2.65 5 2.65a5.1 5.1 0 0 0-.1 3.8A5.3 5.3 0 0 0 3 10.1c0 5.56 3.34 6.75 6.52 7.1a4.8 4.8 0 0 0-1 3.02v4"/></svg>;
@@ -43,41 +44,39 @@ const projects = [
 ]
 
 function Section({ id, index, title, active, onEngage, children, icon: Icon }: { id: string; index: string; title: string; active: string; onEngage: (id: string) => void; children: React.ReactNode; icon: any }) {
+  const [isVisible, setIsVisible] = useState(true)
   const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          onEngage(id)
-        }
-      },
-      { threshold: 0.3 }
-    )
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!sectionRef.current) return
+      const rect = sectionRef.current.getBoundingClientRect()
+      const isHovering = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom
+      setIsVisible(!isHovering)
     }
 
-    return () => observer.disconnect()
-  }, [id, onEngage])
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [])
 
   return (
-    <section
-      id={id}
+    <section 
       ref={sectionRef}
-      className={`relative min-h-screen py-24 px-6 max-w-5xl mx-auto transition-opacity duration-500 opacity-100`}
+      id={id} 
+      className={`section ${active === id ? 'engaged' : ''} ${isVisible ? 'visible' : ''}`}
+      onMouseEnter={() => onEngage(id)}
     >
-      <div className="flex items-center gap-4 mb-8 border-b border-[var(--iron)] pb-4">
-        <span className="text-xs font-mono text-[var(--moss)] px-2 py-1 border border-[var(--moss)] bg-[var(--moss)]/10">
-          // {index}
-        </span>
-        <h2 className="text-2xl md:text-3xl font-bold tracking-wider text-[var(--bone)] flex items-center gap-3">
-          {Icon && <Icon className="w-6 h-6 text-[var(--moss)]" />}
-          {title}
-        </h2>
+      <div className="section-heading">
+        <div className="section-icon">
+          <Icon size={28} />
+        </div>
+        <div className="section-meta">
+          <span>{index}</span>
+          <p>// {title}</p>
+        </div>
+        <h2>{title}</h2>
       </div>
-      <div>{children}</div>
+      {children}
     </section>
   )
 }
@@ -182,12 +181,12 @@ export function AeronauticalInterface() {
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       setMousePos({ x: e.clientX, y: e.clientY })
-      
+
       if (cursorDotRef.current) {
         cursorDotRef.current.style.left = `${e.clientX}px`
         cursorDotRef.current.style.top = `${e.clientY}px`
       }
-      
+
       if (cursorRingRef.current) {
         cursorRingRef.current.style.left = `${e.clientX}px`
         cursorRingRef.current.style.top = `${e.clientY}px`
