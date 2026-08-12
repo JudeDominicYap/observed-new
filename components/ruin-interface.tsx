@@ -43,39 +43,41 @@ const projects = [
 ]
 
 function Section({ id, index, title, active, onEngage, children, icon: Icon }: { id: string; index: string; title: string; active: string; onEngage: (id: string) => void; children: React.ReactNode; icon: any }) {
-  const [isVisible, setIsVisible] = useState(true)
   const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!sectionRef.current) return
-      const rect = sectionRef.current.getBoundingClientRect()
-      const isHovering = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom
-      setIsVisible(!isHovering)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          onEngage(id)
+        }
+      },
+      { threshold: 0.3 }
+    )
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
     }
 
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [])
+    return () => observer.disconnect()
+  }, [id, onEngage])
 
   return (
-    <section 
+    <section
+      id={id}
       ref={sectionRef}
-      id={id} 
-      className={`section ${active === id ? 'engaged' : ''} ${isVisible ? 'visible' : ''}`}
-      onMouseEnter={() => onEngage(id)}
+      className={`relative min-h-screen py-24 px-6 max-w-5xl mx-auto transition-opacity duration-500 opacity-100`}
     >
-      <div className="section-heading">
-        <div className="section-icon">
-          <Icon size={28} />
-        </div>
-        <div className="section-meta">
-          <span>{index}</span>
-          <p>// {title}</p>
-        </div>
-        <h2>{title}</h2>
+      <div className="flex items-center gap-4 mb-8 border-b border-[var(--iron)] pb-4">
+        <span className="text-xs font-mono text-[var(--moss)] px-2 py-1 border border-[var(--moss)] bg-[var(--moss)]/10">
+          // {index}
+        </span>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-wider text-[var(--bone)] flex items-center gap-3">
+          {Icon && <Icon className="w-6 h-6 text-[var(--moss)]" />}
+          {title}
+        </h2>
       </div>
-      {children}
+      <div>{children}</div>
     </section>
   )
 }
